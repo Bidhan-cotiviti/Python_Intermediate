@@ -5,9 +5,14 @@ from datetime import datetime
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('postgresql+psycopg2://postgres:postgres@host.docker.internal/postgres')
+def get_engine(username,password,host,db):
+    engine = create_engine(f'postgresql+psycopg2://{username}:{password}@{host}/{db}')
+    print(engine)
+    engine.connect()
+    session=sessionmaker(bind=engine)()
+    return (engine,session)
+engine,session=get_engine("postgres","postgres","host.docker.internal","postgres")
 
-connection = engine.connect()
 
 Base = declarative_base()
 
@@ -31,9 +36,6 @@ class Project(Base):
     
     
 Base.metadata.create_all(engine)
-
-Session = sessionmaker(bind=engine)
-session = Session()
 
 Bidhan = Supervisor(
     firstname="Bidhan",
@@ -90,6 +92,7 @@ session.add(project3)
 session.add(project4)
 
 
+
 session.commit()
 
 project5 = Project(
@@ -108,3 +111,4 @@ project6 = Project(
 )
 session.add(project6)
 session.flush()
+
